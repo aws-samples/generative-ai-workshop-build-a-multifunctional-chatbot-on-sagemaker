@@ -53,4 +53,14 @@ Replace the domain ID and region with the correct value in your account to acces
 
 You can find some suggested prompt on the left-hand-side sidebar. When you upload the sample files (you can find the sample files in the `test` folder), the chatbot will automatically provide prompt suggestions based on the input data type.
 
-Once you finished Module 1, please feel free to move on to the next Module.
+Once you finished Module 1, please feel free to move on to the **Lab 2** folder to continue the second Module.
+
+## License
+This library is licensed under the MIT-0 License. See the LICENSE file.
+
+## Security
+
+See [CONTRIBUTING](https://github.com/aws-samples/generative-ai-workshop-build-a-multifunctional-chatbot-on-sagemaker/blob/main/CONTRIBUTING.md) for more information.
+
+
+

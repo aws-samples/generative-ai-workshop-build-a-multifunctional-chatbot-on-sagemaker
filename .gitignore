@@ -1,0 +1,10 @@
+.DS_Store
+.ipynb_checkpoints
+__pycache__
+**.pyc
+
+.aws-sam
+**.tmp.*
+
+# Data files (same convention across exercises)
+data/
