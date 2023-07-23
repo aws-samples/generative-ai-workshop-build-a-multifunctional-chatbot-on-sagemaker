@@ -1,0 +1,5 @@
+langchain==0.0.224
+boto3==1.26.165
+streamlit
+sentence-transformers==2.2.2
+sagemaker==2.173.0
