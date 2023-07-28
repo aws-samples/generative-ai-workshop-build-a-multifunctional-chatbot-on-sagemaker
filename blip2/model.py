@@ -1,68 +1,119 @@
-from djl_python import Input, Output
-import os
-import deepspeed
+import hashlib
+import math
+import numpy as np
+import os,io
+import requests
+import time
 import torch
-from transformers import Blip2Processor, Blip2ForConditionalGeneration, pipeline
-
 from PIL import Image
 import base64
 from io import BytesIO
+import json
 
-model = None
-processor = None
+from dataclasses import dataclass
+from transformers import AutoProcessor, AutoModelForCausalLM, BlipForConditionalGeneration, Blip2ForConditionalGeneration
+from tqdm import tqdm
+from typing import List, Optional
+from djl_python import Input, Output
+from safetensors.numpy import load_file, save_file
 
-dtype = torch.float16
-
-def get_model(properties):
-    tensor_parallel_degree = properties["tensor_parallel_degree"] if "tensor_parallel_degree" in properties else 1
-    local_rank = os.environ["LOCAL_RANK"] if "LOCAL_RANK" in os.environ else 0
-    processor = Blip2Processor.from_pretrained(properties["model_id"], cache_dir="/tmp")
-    # logging.info(f"Loading model in {properties['model_id']}")
-    model = Blip2ForConditionalGeneration.from_pretrained(properties["model_id"], device_map="auto", cache_dir="/tmp", torch_dtype=dtype)
-    #embedding = model.language_model.get_input_embeddings()
-    """
-    model.language_model = deepspeed.init_inference(model.language_model,
-                                           tensor_parallel={"tp_size": tensor_parallel_degree},
-                                           dtype=model.dtype,
-                                           replace_method='auto',
-                                           replace_with_kernel_inject=True)
-    """
-    device = f"cuda:{local_rank}"
-    model.to(device)
-    #embedding.to(device)
-    #def inject_function():
-    #    return embedding
-    #model.language_model.get_input_embeddings=inject_function
-    return processor, model
+CAPTION_MODELS = {
+    'blip-base': 'Salesforce/blip-image-captioning-base',   # 990MB
+    'blip-large': 'Salesforce/blip-image-captioning-large', # 1.9GB
+    'blip2-2.7b': 'Salesforce/blip2-opt-2.7b',              # 15.5GB
+    'blip2-flan-t5-xl': 'Salesforce/blip2-flan-t5-xl',      # 15.77GB
+}
 
 
-def handle(inputs: Input) -> None:
-    global model, processor
-    if not model:
-        processor, model = get_model(inputs.get_properties())
+CACHE_URL_BASE = 'https://huggingface.co/pharma/ci-preprocess/resolve/main/'
+
+
+@dataclass 
+class Config:
+    # models can optionally be passed in directly
+    caption_model = None
+    caption_processor = None
+
+    # blip settings
+    caption_max_length: int = 200
+    caption_model_name: Optional[str] = 'blip2-2.7b' # use a key from CAPTION_MODELS or None
+    caption_offload: bool = False
+    
+    # interrogator settings
+    device: str = ("mps" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() else "cpu")
+
+   
+class Blip2():
+    def __init__(self, config: Config):
+        self.config = config
+        self.device = config.device
+        self.dtype = torch.float16 if self.device == 'cuda' else torch.float32
+        self.load_caption_model()
+        self.caption_offloaded = True
+
+    def load_caption_model(self):
+        if self.config.caption_model is None and self.config.caption_model_name:
+
+            model_path = CAPTION_MODELS[self.config.caption_model_name]
+            if self.config.caption_model_name.startswith('blip2-'):
+                caption_model = Blip2ForConditionalGeneration.from_pretrained(model_path, torch_dtype=self.dtype, device_map="auto", cache_dir="/tmp", )
+            else:
+                caption_model = BlipForConditionalGeneration.from_pretrained(model_path, torch_dtype=self.dtype)
+            self.caption_processor = AutoProcessor.from_pretrained(model_path)
+
+            caption_model.eval()
+            if not self.config.caption_offload:
+                caption_model = caption_model.to(self.config.device)
+            self.caption_model = caption_model
+        else:
+            self.caption_model = self.config.caption_model
+            self.caption_processor = self.config.caption_processor
+
+    def generate_caption(self, pil_image: Image, prompt: Optional[str]=None) -> str:
+        assert self.caption_model is not None, "No caption model loaded."
+        self._prepare_caption()
+        inputs = self.caption_processor(images=pil_image, text=prompt, return_tensors="pt").to(self.device)
+        if not self.config.caption_model_name.startswith('git-'):
+            inputs = inputs.to(self.dtype)
+        tokens = self.caption_model.generate(**inputs, max_new_tokens=self.config.caption_max_length)
+        return self.caption_processor.batch_decode(tokens, skip_special_tokens=True)[0].strip()
+
+
+    def _prepare_caption(self):
+        if self.caption_offloaded:
+            self.caption_model = self.caption_model.to(self.device)
+            self.caption_offloaded = False
+
+
+with open('./model_name.json', 'rb') as openfile:
+    json_object = json.load(openfile)
+    
+caption_model_name = json_object.pop('caption_model_name')
+config = Config()
+_service = Blip2(config)
+
+def handle(inputs: Input) -> Optional[Output]:
 
     if inputs.is_empty():
-        # Model server makes an empty call to warmup the model on startup
         return None
-
-    #data = inputs.get_as_string()
     data = inputs.get_as_json()
-    
-    local_rank = os.environ["LOCAL_RANK"] if "LOCAL_RANK" in os.environ else 0
-    device = f"cuda:{local_rank}"
-    
+
     base64_image_string = data.pop("image")
     
     f = BytesIO(base64.b64decode(base64_image_string))
     input_image = Image.open(f).convert("RGB")
-    
+
+
     if 'prompt' in data:
         prompt = data.pop("prompt")
-        inputs = processor(images=input_image, text=prompt, return_tensors="pt").to(device, dtype)
     else:
-        inputs = processor(images=input_image, return_tensors="pt").to(device, dtype)
+        prompt = None
         
-    out = model.generate(**inputs, max_new_tokens=200)
-    generated_text = processor.decode(out[0], skip_special_tokens=True).strip()
-    
+    if 'parameters' in data:
+        params = data["parameters"]
+        if "max_length" in params.keys():
+            config.caption_max_length = params.pop("max_length")
+        
+    generated_text = _service.generate_caption(input_image, prompt)
+
     return Output().add(generated_text)
