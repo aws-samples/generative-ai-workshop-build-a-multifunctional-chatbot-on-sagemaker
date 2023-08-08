@@ -3,6 +3,8 @@ This repository contains code examples for **SageMaker** Generative AI, which is
 
 ### Module 1 - Build a Multi-functional Chatbot on Amazon SageMaker
 
+>  ⚠️ This workshop is designed to run on Amazon SageMaker Studio, the streamlit app will be running in Studio JupyterServer Terminal
+
 In this section, we will deploy three LLMs on SageMaker to serve different input data types, such as text, image, and audio. The chatbot UI design architecture is as below:
 
 <div align="center" >
@@ -30,7 +32,7 @@ We first start with the notebook, `lab1-depploy_opensource_llms_on_amazon_sagema
 
 There are 5 tasks in this notebook that you need to 'FILL IN' the missing code. However, if you want to run the notebook with the full code, you can cope the notebook `lab1-depploy_opensource_llms_on_amazon_sagemaker.ipynb` in the `solutions` folder that has all the code cells pre-filled. demonstrates how to easily create a SageMaker endpoint for the pre-trained Stable Diffusion model and generate cat images based on user prompts. Users can input fun scenarios and prompts to generate various cat images. If you are looking for other solutions using different embedding model and vector database, you can refer to the blogs [Building AI-powered search in PostgreSQL using Amazon SageMaker and pgvector](https://aws.amazon.com/blogs/database/building-ai-powered-search-in-postgresql-using-amazon-sagemaker-and-pgvector/) and [Build a powerful question answering bot with Amazon SageMaker, Amazon OpenSearch Service, Streamlit, and LangChain](https://aws.amazon.com/blogs/machine-learning/build-a-powerful-question-answering-bot-with-amazon-sagemaker-amazon-opensearch-service-streamlit-and-langchain/).
 
-Once all the endpoints are deployed successfully, you can open a terminal in SageMaker Studio and use the below command to run the chatbot [Streamlit](https://streamlit.io/) application. Note that you need to install the required python packages that are specified in the “requirements.txt” file. You also need to update the environment variables with the endpoint names deployed in your account accordingly. When you execute the `chatbot-text-audio-image.py` file, it will automatically update the endpoint names based on the environment variables.
+Once all the endpoints are deployed successfully, you can open a **terminal in SageMaker Studio** and use the below command to run the chatbot [Streamlit](https://streamlit.io/) application. Note that you need to install the required python packages that are specified in the “requirements.txt” file. You also need to update the environment variables with the endpoint names deployed in your account accordingly. When you execute the `chatbot-text-audio-image.py` file, it will automatically update the endpoint names based on the environment variables.
 
 
 ```python

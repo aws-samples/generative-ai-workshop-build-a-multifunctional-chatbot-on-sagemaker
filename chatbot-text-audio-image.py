@@ -171,7 +171,7 @@ content_handler = ContentHandler()
 
 llm = SagemakerEndpoint(
             endpoint_name=Falcon_endpoint_name,
-            region_name="us-east-1",
+            region_name=aws_region,
             content_handler=content_handler,
     )
 
@@ -360,7 +360,7 @@ with left_column:
                     sanity_chain = load_qa_chain(llm=llm, prompt=sanity_prompt)
                     sanity_check = sanity_chain({"input_documents": contexts, "statement": output},
                                    return_only_outputs=True)['output_text']
-                    if sanity_check[0] == 'N':
+                    if len(contexts)==0 or (sanity_check[0] == 'N'):
                         output = "Sorry. There is not enough information in the knowledge base for me to answer this question. Please try to ask another queston."
                 else:
                     output = chatchain(user_input)["response"]
