@@ -33,7 +33,7 @@ st.set_page_config(page_title="Document Analysis", page_icon=":robot:")
 
 
 Falcon_endpoint_name = os.getenv("nlp_ep_name", default="falcon-7b-instruct-2xl")
-CV_endpoint_name = os.getenv("cv_ep_name", default="blip2-large-v2-xlarge")
+CV_endpoint_name = os.getenv("cv_ep_name", default="blip2-flan-t5-xlarge")
 whisper_endpoint_name = os.getenv('speech_ep_name', default="whisper-large-v2")
 embedding_endpoint_name = os.getenv('embed_ep_name', default="huggingface-textembedding-gpt-j-6b-fp16-4xlarge")
 
