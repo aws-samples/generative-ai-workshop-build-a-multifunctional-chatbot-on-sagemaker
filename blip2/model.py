@@ -51,13 +51,12 @@ class Blip2():
     def load_caption_model(self, properties):
         if self.config.caption_model is None and self.config.caption_model_name:
             model_path = CAPTION_MODELS[self.config.caption_model_name]
-            if "model_id" in properties:
+            if "model_id" in properties and any(os.listdir(properties["model_id"])):
                 model_path = properties["model_id"]
-                if any(os.listdir(model_path)):
-                    files_in_folder = os.listdir(model_path)
-                    print('model path files:')
-                    for file in files_in_folder:
-                        print(file)
+                files_in_folder = os.listdir(model_path)
+                print('model path files:')
+                for file in files_in_folder:
+                    print(file)
                 else:
                     raise ValueError('Please make sure the model artifacts are uploaded to s3')
 
