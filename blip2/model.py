@@ -57,8 +57,6 @@ class Blip2():
                 print('model path files:')
                 for file in files_in_folder:
                     print(file)
-                else:
-                    raise ValueError('Please make sure the model artifacts are uploaded to s3')
 
             print(f'model path: {model_path}')
             if self.config.caption_model_name.startswith('blip2-'):
