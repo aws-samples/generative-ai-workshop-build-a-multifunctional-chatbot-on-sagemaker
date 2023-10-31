@@ -4,8 +4,8 @@ altair==5.0.1
 async-timeout==4.0.2
 attrs==23.1.0
 blinker==1.6.2
-boto3==1.26.165
-botocore==1.29.165
+boto3==1.28.74
+botocore==1.31.74
 cachetools==5.3.1
 certifi==2023.7.22
 charset-normalizer==3.1.0
@@ -34,9 +34,6 @@ numpy==1.24.3
 openapi-schema-pydantic==1.2.4
 packaging==23.1
 pandas==2.0.2
-Pillow==10.0.1
-protobuf==4.23.2
-pyarrow==12.0.0
 pydantic==1.10.9
 pydeck==0.8.1b0
 Pygments==2.15.1
@@ -48,7 +45,7 @@ pytz-deprecation-shim==0.1.0.post0
 PyYAML==6.0
 requests==2.31.0
 rich==13.4.1
-s3transfer==0.6.1
+s3transfer==0.7.0
 six==1.16.0
 smmap==5.0.0
 SQLAlchemy==2.0.15
