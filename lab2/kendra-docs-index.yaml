@@ -6,7 +6,53 @@
 ##It takes about 30 minutes to create an Amazon Kendra index and about 15 minutes more to crawl and index
 ##the content of these webpages to the index. Hence you might need to wait for about 45 minutes after
 ##launching the CloudFormation stack
+
+#Create Parameters to input the name of the existing SageMaker execution role
+Parameters:
+  SageMakerExecutionRoleName:
+    Type: String
+    Description: The name of the existing SageMaker execution role
+
 Resources:
+  MyRolePolicyAttachmentKendra:
+    Type: 'AWS::IAM::Policy'
+    Properties: 
+      PolicyName: 'MyKendraPolicyAttachment'
+      Roles: 
+        - !Ref SageMakerExecutionRoleName
+      PolicyDocument: 
+        Version: '2012-10-17'
+        Statement: 
+          - Effect: 'Allow'
+            Action: 'kendra:*'
+            Resource: '*'
+
+  MyRolePolicyAttachmentIAM:
+    Type: 'AWS::IAM::Policy'
+    Properties: 
+      PolicyName: 'MyIAMPolicyAttachment'
+      Roles: 
+        - !Ref SageMakerExecutionRoleName
+      PolicyDocument: 
+        Version: '2012-10-17'
+        Statement: 
+          - Effect: 'Allow'
+            Action: 'iam:*'
+            Resource: '*'
+
+  MyRolePolicyAttachmentLambda:
+    Type: 'AWS::IAM::Policy'
+    Properties: 
+      PolicyName: 'MyLambdaPolicyAttachment'
+      Roles: 
+        - !Ref SageMakerExecutionRoleName
+      PolicyDocument: 
+        Version: '2012-10-17'
+        Statement: 
+          - Effect: 'Allow'
+            Action: 'lambda:*'
+            Resource: '*'
+
   ##Create the Role needed to create a Kendra Index
   KendraIndexRole:
     Type: 'AWS::IAM::Role'
