@@ -50,11 +50,12 @@ This project demonstrates how to build a multi-functional chatbot that leverages
 
 *This Demo project is developed with AWS Sagemaker AI Studio, https://docs.aws.amazon.com/sagemaker/latest/dg/studio-updated-jl.html*
 
-4.1. Please follow [guidence steps](https://docs.aws.amazon.com/sagemaker/latest/dg/studio-updated-jl-user-guide.html) here, if you are not using AWS Sagemaker AI Studio before;
+4.1. Please follow [guidence steps](https://docs.aws.amazon.com/sagemaker/latest/dg/studio-updated-jl-user-guide.html) here, if you don't use AWS Sagemaker AI Studio.
 
-4.2. Please clone this repo or upload the code to the juoyterlab notebook, and then starting with `lab/lab-code.ipynb`
+4.2. Please clone this repo or upload the code to the juoyterlab notebook, and then starting with `lab/lab-code.ipynb`.
 
 4.3. Run the cells of the notebook, to initialize all the related resources on your AWS account.
+
 4.4. Once the resources are initilized, then please execute the below steps to access the Streamlit Web App:
 
 ```bash
@@ -62,7 +63,7 @@ This project demonstrates how to build a multi-functional chatbot that leverages
 
 pip install streamlit
 
-streamlit run demo-dev/app.py 
+streamlit run lab/app.py 
 
 # To access the Streamlit Web Application via:
 # 1. Copy & paste the URL of the Sagemaker Studio Jupyterlab web URL, eg:
@@ -111,6 +112,3 @@ This library is licensed under the MIT-0 License. See the LICENSE file.
 ## Security
 
 See [CONTRIBUTING](https://github.com/aws-samples/generative-ai-workshop-build-a-multifunctional-chatbot-on-sagemaker/blob/main/CONTRIBUTING.md) for more information.
-
-
-

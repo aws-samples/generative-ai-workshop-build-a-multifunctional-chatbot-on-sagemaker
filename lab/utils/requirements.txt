@@ -14,4 +14,7 @@ requests
 pypdf
 tqdm
 pandas
+PyPDF2
+python-docx
+pillow
 sagemaker==2.237.1

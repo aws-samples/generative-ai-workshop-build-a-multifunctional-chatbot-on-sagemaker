@@ -100,7 +100,7 @@ class ConfigManager:
     def load_config():
         """Load configuration from file"""
         try:
-            with open('demo-dev/utils/tmp_config.json', 'r') as f:
+            with open('lab/utils/tmp_config.json', 'r') as f:
                 config = json.load(f)
                 return (
                     config['kb_id'],
