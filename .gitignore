@@ -4,7 +4,7 @@ __pycache__
 **.pyc
 
 .aws-sam
-**.tmp.*
+**tmp*
 
 # Data files (same convention across exercises)
 data/

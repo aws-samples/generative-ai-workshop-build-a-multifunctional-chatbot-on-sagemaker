@@ -1,61 +1,110 @@
-## Amazon SageMaker Generative AI workshop - Build Generative AI applications on SageMaker
-This repository contains code examples for **SageMaker** Generative AI, which is designed to help users build a multi-functional chatbot on Amazon SageMaker. This repo contains two modules: Module 1, build a multi-functional chatbot on SageMaker using open-source Large Language Models (LLMs); Module 2, build [high-accuracy Generative AI application on enterprise data using Amazon Kendra, LangChain, and large language models](https://aws.amazon.com/blogs/machine-learning/quickly-build-high-accuracy-generative-ai-applications-on-enterprise-data-using-amazon-kendra-langchain-and-large-language-models/).
+## Build Generative AI applications with Bedrock Knowledge Base and DeepSeek R1 Models
 
-### Module 1 - Build a Multi-functional Chatbot on Amazon SageMaker
-
->  ⚠️ This workshop is designed to run on Amazon SageMaker Studio, the streamlit app will be running in Studio JupyterServer Terminal
-
-In this section, we will deploy three LLMs on SageMaker to serve different input data types, such as text, image, and audio. The chatbot UI design architecture is as below:
-
-<div align="center" >
-<img width=800 src="img/architecture-workshop-UI.png"><figcaption>Solution Architecture</figcaption></img>
-</div>
-
-When the user uploads an image file with input query, the image and query text will be sent to the [`Blip2`](https://huggingface.co/Salesforce/blip2-opt-6.7b) model, which can perform:
-- image captioning
-- visual question answering (VQA)
-- chat-like conversations by feeding the image and the previous conversation as prompt to the model
-
-Then the LLM will be able to answer questions about this input image. You can use LLM to batch process the image dataset with predefined questions and automatically extract useful information without manual process the image data. You can also generate image captions for the image dataset to add additional context for advanced search capability. 
-
-When the user uploads a txt file, the information will be loaded to the [LangChain memory](https://api.python.langchain.com/en/latest/memory/langchain.memory.buffer.ConversationBufferMemory.html#langchain.memory.buffer.ConversationBufferMemory) to help the chatbot to 'remember' the document and user can `chat` with the uploaded document. 
-
-The chatbot also has the capability to retrieve information from the knowledge database to answer questions based on the relevant information. Note that the knowledge database contains the transcribed text files from the sample video file in the 'test' folder. You can use your preferred tools to extract the text from the video file. This section is to demonstrate how to leverage the digital assets of the enterprise organisation to allow users to search for contents that are not presented as documents, such as videos and audio files. Instead of searching in the metadata or going through the whole video file to locate the relevant information. Users can transcribe all the video/audio data and store them in the vector database to allow simple senmatic search and provide the summarised answers by the LLM. The retrieved source file will also be presented to the end user for reference. 
-
-#### Lab Instructions
-We first start with the notebook, `lab1-depploy_opensource_llms_on_amazon_sagemaker.ipynb`, which contains three sections to deploy the text-to-text, image-to-text and embedding LLMs to SageMaker. If you have time, there are two optional sections that demonstrate how to evaluate the inference cost and deploy an open-source speech-to-text model to SageMaker. Section list:
-- Section 1: Deploy Text-to-Text LLM on SageMaker
-- Secton 2: Deploy image-to-text LLM on SageMaker (Multimodality)
-- Section 3: Deploy embedding model and implement RAG solution using LangChain on SageMaker
-- Section 4: (Optional) Run SageMaker Inference Recommender job to determine the cost and performance of the LLM
-- Section 5: (Optional) Deploy speech-to-text LLM on SageMaker (note that you can also use Amazon Trascribe to performe the same function)
-
-Follow the instructions in the notebook, you will be able to deploy the different open-source models on SagMaker using either the [Hugging Face Text Generation Inference (TGI)](https://huggingface.co/blog/sagemaker-huggingface-llm) container or the AWS [Large Model Inference (LMI)](https://docs.aws.amazon.com/sagemaker/latest/dg/large-model-inference-dlc.html) container. In this example workshop, as the documents used in the RAG solution are small, we store the embeddings of the documents in a FAISS vector store to create an index using LangChain. We use this index to find relevant documents that are semantically similar to the user’s query. If you are looking for other solutions using different embedding model and vector database, you can refer to the blogs [Building AI-powered search in PostgreSQL using Amazon SageMaker and pgvector](https://aws.amazon.com/blogs/database/building-ai-powered-search-in-postgresql-using-amazon-sagemaker-and-pgvector/) and [Build a powerful question answering bot with Amazon SageMaker, Amazon OpenSearch Service, Streamlit, and LangChain](https://aws.amazon.com/blogs/machine-learning/build-a-powerful-question-answering-bot-with-amazon-sagemaker-amazon-opensearch-service-streamlit-and-langchain/). Note that in notebook `(option-2)lab1-deploy_opensource_llms_on_amazon_sagemaker.ipynb` we have demonstrated how to host the embedding model on SageMaker as part of the RAG solution.
-
-Once all the endpoints are deployed successfully, you can open a **terminal in SageMaker Studio** and use the below command to run the chatbot [Streamlit](https://streamlit.io/) application. Note that you need to install the required python packages that are specified in the “requirements.txt” file. You also need to update the environment variables with the endpoint names deployed in your account accordingly. When you execute the `chatbot-text-audio-image.py` file, it will automatically update the endpoint names based on the environment variables.
+This project demonstrates how to build a multi-functional chatbot that leverages AWS Bedrock Knowledge Base and multiple AI models including DeepSeek R1, Amazon Titan Nova Pro, and Claude 3.5 Sonnet.
 
 
-```python
-$ pip install -r requirements.txt
-$ export nlp_ep_name=<the falcon endpoint name deployed in your account>
-$ export cv_ep_name=<the whisper endpoint name deployed in your account>
-$ export embed_ep_name=<the embedding endpoint name deployed in your account>
-$ streamlit run chatbot-text-audio-image.py --server.port 6006 --server.maxUploadSize 6
+###  1. Architecture Overview
+
+![demo-architecture](./img/gen-ai-demo-architecture.png)
+
+
+### 2. Application Components
+
+**2.1 Knowledge Base System** 
+- AWS Bedrock Knowledge Base for document storage and retrieval
+- Amazon Titan Text Embeddings V2 for text vectorization
+- OpenSearch Serverless for vector search capabilities
+
+**2.2 Generation Models**
+- Amazon Titan Nova Pro - Supports text, images, files and knowledge base integration
+- Claude 3.5 Sonnet - Supports text, images, files and knowledge base integration
+- DeepSeek R1 Distill Qwen 1.5B - Supports text, files and knowledge base integration
+
+**2.3 Web Interface**
+- Built with Streamlit
+- Supports file uploads (images, PDFs, text files, etc)
+- Interactive query interface
+- Model parameter controls
+
+### 3. Application Features:
+
+**3.1 Multi-Modal Input Support**
+- Text queries
+- Image uploads with automatic compression
+- Document uploads (PDF, TXT, DOCX, JSON, etc)
+- Preview capabilities
+
+
+**3.2 Knowledge Base Integration**
+- Document ingestion and chunking
+- Vector embeddings generation
+- Semantic search capabilities
+
+**3.3 Model Selection**
+- Choice between different AI models
+- Configurable model parameters
+- Model-specific optimizations
+
+
+### 4. Setup and Usage
+
+*This Demo project is developed with AWS Sagemaker AI Studio, https://docs.aws.amazon.com/sagemaker/latest/dg/studio-updated-jl.html*
+
+4.1. Please follow [guidence steps](https://docs.aws.amazon.com/sagemaker/latest/dg/studio-updated-jl-user-guide.html) here, if you don't use AWS Sagemaker AI Studio.
+
+4.2. Please clone this repo or upload the code to the juoyterlab notebook, and then starting with `lab/lab-code.ipynb`.
+
+4.3. Run the cells of the notebook, to initialize all the related resources on your AWS account.
+
+4.4. Once the resources are initilized, then please execute the below steps to access the Streamlit Web App:
+
+```bash
+# Start a Terminal Session on Jupyterlab, then execute the below command:
+
+pip install streamlit
+
+streamlit run lab/app.py 
+
+# To access the Streamlit Web Application via:
+# 1. Copy & paste the URL of the Sagemaker Studio Jupyterlab web URL, eg:
+https://xxxxxxxxxxxxx.studio.us-west-2.sagemaker.aws/jupyterlab/default/lab/.../lab-code.ipynb
+
+# 2. Update the url as below format, and access the url via a new browser tab:
+https://xxxxxxxxxxxxx.studio.us-west-2.sagemaker.aws/jupyterlab/default/proxy/8501/
+
+```
+4.5. Clean up via executing the last cell of the notebook.
+
+
+### 5. Test the Application:
+
+5.1. To verify if the KB is working as expected, please use any model in the APP with below query:
+```
+Please find the next half sentence of the below sentence:
+
+In macroscopic closed systems, nonconservative forces act to change the internal energies of the system
+```
+Expected answer should contain:
+```
+and are often associated with the irreversible transformation of energy into heat.
 ```
 
-To access the Streamlit UI, copy your SageMaker Studio url and replace `lab?` with `proxy/[PORT NUMBER]/`. Because we specified the server port to 6006, so the url should look like:
+
+5.2. You can disable `Use Knowledge Base` then test with general Q&A with different models.
+
+5.3. You can upload images and/or files to test the Application.
+
 ```
-https://<domain ID>.studio.<region>.sagemaker.aws/jupyter/default/proxy/6006/
+Please aware
+- with any attachment uploaded, then the APP will disable the KB by default.
+- DeepSeek as text based model, current does not support image session.
 ```
-Replace the domain ID and region with the correct value in your account to access the UI as below:
 
-<div align="center" >
-<img width=800 src="img/Streamlit_UI.png"><figcaption>Chatbot UI</figcaption></img>
-</div>
+5.4 Streamlit Web UI Screenshot
 
-You can find some suggested prompt on the left-hand-side sidebar. When you upload the sample files (you can find the sample files in the `test` folder), the chatbot will automatically provide prompt suggestions based on the input data type.
+![Steamlit-web-ui](./img/streamlit-web-ui.png)
 
-Once you finished Module 1, please feel free to move on to the **Lab 2** folder to continue the second Module.
+
 
 ## License
 This library is licensed under the MIT-0 License. See the LICENSE file.
@@ -63,6 +112,3 @@ This library is licensed under the MIT-0 License. See the LICENSE file.
 ## Security
 
 See [CONTRIBUTING](https://github.com/aws-samples/generative-ai-workshop-build-a-multifunctional-chatbot-on-sagemaker/blob/main/CONTRIBUTING.md) for more information.
-
-
-
